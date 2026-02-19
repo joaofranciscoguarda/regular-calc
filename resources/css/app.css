@@ -1,5 +1,19 @@
 @import 'tailwindcss';
 
+@font-face {
+    font-family: 'WalkAroundTheBlock';
+    src: url('/fonts/Walk-Around-the-Block.ttf') format('truetype');
+    font-weight: normal;
+    font-style: normal;
+}
+
+@font-face {
+    font-family: 'NJNaruto';
+    src: url('/fonts/njnaruto.ttf') format('truetype');
+    font-weight: normal;
+    font-style: normal;
+}
+
 @import 'tw-animate-css';
 
 @source '../../vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php';
@@ -12,6 +26,8 @@
         Instrument Sans, ui-sans-serif, system-ui, sans-serif,
         'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol',
         'Noto Color Emoji';
+    --font-display: 'WalkAroundTheBlock', cursive;
+    --font-accent: 'NJNaruto', cursive;
 
     --radius-lg: var(--radius);
     --radius-md: calc(var(--radius) - 2px);
@@ -86,6 +102,17 @@
             'Instrument Sans', ui-sans-serif, system-ui, sans-serif,
             'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol',
             'Noto Color Emoji';
+    }
+
+    .font-display {
+        font-family: var(--font-display);
+        font-size: 60px;
+    }
+
+    .font-accent {
+        font-family: var(--font-accent);
+        font-size: 24px;
+        letter-spacing: 0.25em;
     }
 }
 
