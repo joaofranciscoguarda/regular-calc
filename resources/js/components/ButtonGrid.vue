@@ -11,13 +11,11 @@ defineProps<{
 <template>
     <div class="grid grid-cols-5 gap-2">
         <template v-for="(row, rowIdx) in buttons" :key="rowIdx">
-            <template
-                v-for="(btn, btnIdx) in row"
-                :key="`${rowIdx}-${btnIdx}`"
-            >
+            <template v-for="(btn, btnIdx) in row" :key="`${rowIdx}-${btnIdx}`">
                 <CalcButton
                     :variant="btn.variant ?? 'outline'"
                     :key-shortcut="btn.keyShortcut"
+                    :tooltip="btn.tooltip"
                     :disabled="isLoading"
                     :class="[
                         'h-14 rounded-xl border border-white/10 bg-black/50 text-lg text-white backdrop-blur transition hover:bg-white/10 active:scale-95',

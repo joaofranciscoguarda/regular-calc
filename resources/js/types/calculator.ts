@@ -17,4 +17,5 @@ export type CalcBtn = {
         | 'ghost'
         | 'link';
     class?: string;
+    tooltip?: string;
 };
