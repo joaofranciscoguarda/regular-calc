@@ -1,12 +1,14 @@
 <script setup lang="ts">
 import { Head, router } from '@inertiajs/vue3';
 import { ref, computed } from 'vue';
-import CalcButton from '@/components/CalcButton.vue';
 import TickerTape from '@/components/TickerTape.vue';
+import CalcDisplay from '@/components/CalcDisplay.vue';
+import ButtonGrid from '@/components/ButtonGrid.vue';
 import {
     type HistoryEntry,
-    paginatedWithDefaults,
     type Paginated,
+    type CalcBtn,
+    paginatedWithDefaults,
 } from '@/types';
 
 // ─── Props ────────────────────────────────────────────────────────────────────
@@ -25,9 +27,6 @@ const expression = ref('');
 const result = ref<string | null>(null);
 const error = ref<string | null>(null);
 const isLoading = ref(false);
-
-// ─── Computed ─────────────────────────────────────────────────────────────────
-const displayExpression = computed(() => expression.value || '0');
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 function balanceParens(expr: string): string {
@@ -122,19 +121,6 @@ function pasteFromTicker(expr: string) {
 }
 
 // ─── Button definitions ───────────────────────────────────────────────────────
-type CalcBtn = {
-    label: string;
-    action: () => void;
-    keyShortcut?: string;
-    variant?:
-        | 'default'
-        | 'destructive'
-        | 'outline'
-        | 'secondary'
-        | 'ghost'
-        | 'link';
-    class?: string;
-};
 
 const buttons: CalcBtn[][] = [
     [
@@ -264,71 +250,14 @@ const buttons: CalcBtn[][] = [
                     Regular Calc
                 </h1>
 
-                <!-- Display -->
-                <div
-                    class="rounded-xl border border-white/10 bg-black/60 px-5 py-4 shadow-inner shadow-black/40 backdrop-blur"
-                >
-                    <p
-                        class="min-h-6 text-right font-accent text-lg break-all transition-all"
-                        :class="expression ? 'text-white/60' : 'text-white/20'"
-                    >
-                        {{ displayExpression }}
-                    </p>
+                <CalcDisplay
+                    :expression="expression"
+                    :result="result"
+                    :error="error"
+                    :is-loading="isLoading"
+                />
 
-                    <div>
-                        <p
-                            v-if="result !== null"
-                            :key="'result'"
-                            class="mt-1 text-right font-accent text-4xl font-bold text-white drop-shadow"
-                        >
-                            = {{ result }}
-                        </p>
-                        <p
-                            v-else-if="error"
-                            :key="'error'"
-                            class="mt-1 text-right font-accent text-sm text-red-400"
-                        >
-                            {{ error }}
-                        </p>
-                        <p
-                            v-else-if="isLoading"
-                            :key="'loading'"
-                            class="mt-1 animate-pulse text-right font-accent text-3xl text-white/40"
-                        >
-                            …
-                        </p>
-                    </div>
-                </div>
-
-                <!-- Button grid -->
-                <div class="grid grid-cols-5 gap-2">
-                    <template v-for="(row, rowIdx) in buttons" :key="rowIdx">
-                        <template
-                            v-for="(btn, btnIdx) in row"
-                            :key="`${rowIdx}-${btnIdx}`"
-                        >
-                            <CalcButton
-                                :variant="btn.variant ?? 'outline'"
-                                :key-shortcut="btn.keyShortcut"
-                                :disabled="isLoading"
-                                :class="[
-                                    'h-14 rounded-xl border border-white/10 bg-black/50 text-lg text-white backdrop-blur transition hover:bg-white/10 active:scale-95',
-                                    btn.variant === 'destructive' &&
-                                        'border-red-500/30 bg-red-900/40 text-red-300 hover:bg-red-800/60',
-                                    btn.variant === 'secondary' &&
-                                        'border-violet-400/20 bg-violet-900/30 text-violet-300 hover:bg-violet-800/50',
-                                    btn.label === '=' &&
-                                        'border-violet-400/40 bg-violet-700/80 text-white hover:bg-violet-600/90',
-                                    btn.class,
-                                ]"
-                                size="lg"
-                                @click="btn.action"
-                            >
-                                {{ btn.label }}
-                            </CalcButton>
-                        </template>
-                    </template>
-                </div>
+                <ButtonGrid :buttons="buttons" :is-loading="isLoading" />
 
                 <p class="text-center font-accent text-xs text-white/30">
                     Keyboard shortcuts enabled · Try sqrt( or ^
