@@ -5,23 +5,21 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\ExpressionRequest;
 use App\Http\Resources\UserCalculationHistory;
-use App\Models\Calculation;
 use App\Models\UserHistory;
+use App\Services\CalculationService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Cache;
-use jcubic\Expression;
 
 class CalculationController extends Controller
 {
+    public function __construct(private CalculationService $calculationService)
+    {
+    }
+
     public function index(Request $request): JsonResponse
     {
         $sessionId = $request->attributes->get('calc_session_id');
-
-        $history = UserHistory::with('calculation')
-            ->where('session_id', $sessionId)
-            ->latest('created_at')
-            ->paginate(10);
+        $history = $this->calculationService->getHistory($sessionId);
 
         return response()->json(UserCalculationHistory::collection($history)->response()->getData());
     }
@@ -29,43 +27,18 @@ class CalculationController extends Controller
     public function store(ExpressionRequest $request): JsonResponse
     {
         $expression = $request->input('expression');
-        $cacheKey   = 'calc:' . $expression;
-        $sessionId  = $request->attributes->get('calc_session_id');
+        $sessionId = $request->attributes->get('calc_session_id');
 
         try {
-            $cached = Cache::store('redis')->rememberForever($cacheKey, function () use ($expression) {
-                $evaluated = (new Expression())->evaluate($expression);
-
-                if ($evaluated === false || $evaluated === null) {
-                    throw new \RuntimeException('Invalid expression');
-                }
-
-                $result = (is_float($evaluated) && floor($evaluated) == $evaluated && abs($evaluated) < PHP_INT_MAX)
-                    ? (string) (int) $evaluated
-                    : (string) $evaluated;
-
-                $calculation = Calculation::create([
-                    'expression' => $expression,
-                    'result'     => $result,
-                ]);
-
-                return ['result' => $result, 'calculation_id' => $calculation->id];
-            });
-
-            $entry = UserHistory::create([
-                'session_id'     => $sessionId,
-                'calculation_id' => $cached['calculation_id'],
-            ]);
+            $result = $this->calculationService->calculate($expression, $sessionId);
 
             return response()->json([
-                'id'         => $entry->id,
-                'expression' => $expression,
-                'result'     => $cached['result'],
-                'created_at' => $entry->created_at,
+                'id'         => $result['user_history_id'],
+                'expression' => $result['expression'],
+                'result'     => $result['result'],
+                'created_at' => $result['created_at'],
             ], 201);
         } catch (\Throwable $e) {
-            Cache::store('redis')->forget($cacheKey);
-
             return response()->json([
                 'error' => 'Could not evaluate: ' . $e->getMessage(),
             ], 422);
@@ -74,18 +47,19 @@ class CalculationController extends Controller
 
     public function destroy(Request $request, UserHistory $userHistory): JsonResponse
     {
-        if ($userHistory->session_id !== $request->attributes->get('calc_session_id')) {
+        $sessionId = $request->attributes->get('calc_session_id');
+
+        if (!$this->calculationService->deleteHistoryEntry($userHistory, $sessionId)) {
             return response()->json(['error' => 'Not found'], 404);
         }
-
-        $userHistory->delete();
 
         return response()->json(['message' => 'Deleted']);
     }
 
     public function destroyAll(Request $request): JsonResponse
     {
-        UserHistory::where('session_id', $request->attributes->get('calc_session_id'))->delete();
+        $sessionId = $request->attributes->get('calc_session_id');
+        $this->calculationService->clearHistory($sessionId);
 
         return response()->json(['message' => 'History cleared']);
     }
