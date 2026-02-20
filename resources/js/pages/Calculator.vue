@@ -1,9 +1,9 @@
 <script setup lang="ts">
 import { Head, router } from '@inertiajs/vue3';
-import { ref, computed } from 'vue';
-import TickerTape from '@/components/TickerTape.vue';
-import CalcDisplay from '@/components/CalcDisplay.vue';
+import { ref } from 'vue';
 import ButtonGrid from '@/components/ButtonGrid.vue';
+import CalcDisplay from '@/components/CalcDisplay.vue';
+import TickerTape from '@/components/TickerTape.vue';
 import {
     type HistoryEntry,
     type Paginated,
