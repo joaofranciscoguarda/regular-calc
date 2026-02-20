@@ -29,7 +29,7 @@ class CalculationController extends Controller
 
     public function store(ExpressionRequest $request): RedirectResponse
     {
-        $expression = trim($request->input('expression'));
+        $expression = $request->input('expression');
         $cacheKey   = 'calc:' . $expression;
         $sessionId  = $request->session()->getId();
 

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\ExpressionRequest;
 use App\Http\Resources\UserCalculationHistory;
 use App\Models\Calculation;
 use App\Models\UserHistory;
@@ -25,13 +26,9 @@ class CalculationController extends Controller
         return response()->json(UserCalculationHistory::collection($history)->response()->getData());
     }
 
-    public function store(Request $request): JsonResponse
+    public function store(ExpressionRequest $request): JsonResponse
     {
-        $request->validate([
-            'expression' => ['required', 'string', 'max:1000'],
-        ]);
-
-        $expression = trim($request->input('expression'));
+        $expression = $request->input('expression');
         $cacheKey   = 'calc:' . $expression;
         $sessionId  = $request->attributes->get('calc_session_id');
 
