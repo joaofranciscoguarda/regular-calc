@@ -10,3 +10,15 @@ Route::middleware(EnsureApiSession::class)->group(function () {
     Route::delete('/calculations', [CalculationController::class, 'destroyAll']);
     Route::delete('/calculations/{userHistory}', [CalculationController::class, 'destroy']);
 });
+
+Route::get('up', function() {
+    return response()->json("Healthy");
+})->name('status');
+
+Route::get("/", function() {
+    return redirect()->route("status");
+});
+
+Route::fallback(function(){
+    return redirect()->route("status");
+});

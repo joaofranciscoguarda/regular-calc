@@ -9,18 +9,6 @@ It was intentionally kept simple for the purpose of this technical test.
 
 ## Setup
 
-### Using Laravel Sail
-
-If you don’t have the `sail` alias configured, replace `sail` with:
-
-```
-./vendor/bin/sail
-```
-
-in all commands below.
-
----
-
 ### Install Dependencies
 
 ```
@@ -36,14 +24,42 @@ pnpm install
 
 ---
 
+### Using Laravel Sail
+
+If you don’t have the `sail` alias configured, replace `sail` with:
+
+```
+./vendor/bin/sail
+```
+
+in all commands below.
+
+---
+
 ## Running the Application
 
-Start the containers and development server:
+### Do ONCE:
+
+_IF no `.env` already defined, copy .env.example to `.env`_
+
+```
+cp .env.example .env
+```
+
+_IF no APP_KEY inside .env_
+
+```
+php artisan key:generate
+```
+
+---
+
+## Start the containers and development server:
 
 ```
 sail up -d
-sail pnpm dev
 sail artisan migrate
+sail pnpm dev
 ```
 
 ---
