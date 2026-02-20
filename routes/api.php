@@ -1,9 +1,12 @@
 <?php
 
-use App\Http\Controllers\CalculationController;
+use App\Http\Controllers\Api\CalculationController;
+use App\Http\Middleware\EnsureApiSession;
 use Illuminate\Support\Facades\Route;
 
-Route::get('/calculations', [CalculationController::class, 'index']);
-Route::post('/calculations', [CalculationController::class, 'store']);
-Route::delete('/calculations', [CalculationController::class, 'destroyAll']);
-Route::delete('/calculations/{calculation}', [CalculationController::class, 'destroy']);
+Route::middleware(EnsureApiSession::class)->group(function () {
+    Route::get('/calculations', [CalculationController::class, 'index']);
+    Route::post('/calculations', [CalculationController::class, 'store']);
+    Route::delete('/calculations', [CalculationController::class, 'destroyAll']);
+    Route::delete('/calculations/{userHistory}', [CalculationController::class, 'destroy']);
+});

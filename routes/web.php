@@ -1,15 +1,13 @@
 <?php
 
+use App\Http\Controllers\CalculationController;
 use Illuminate\Support\Facades\Route;
-use Inertia\Inertia;
-use Laravel\Fortify\Features;
 
-Route::get('/', function () {
-    return Inertia::render('Calculator');
-})->name('home');
+Route::get('/', [CalculationController::class, 'index'])->name('home');
+Route::post('/calculations', [CalculationController::class, 'store'])->name('calculations.store');
+Route::delete('/calculations/{userHistory}', [CalculationController::class, 'destroy'])->name('calculations.destroy');
+Route::delete('/calculations', [CalculationController::class, 'destroyAll'])->name('calculations.destroyAll');
 
-Route::get('dashboard', function () {
-    return Inertia::render('Dashboard');
-})->middleware(['auth', 'verified'])->name('dashboard');
-
-require __DIR__.'/settings.php';
+Route::fallback(function () {
+    return redirect()->route('home');
+});
